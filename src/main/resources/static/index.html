@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobTracker — Land Your Dream Job</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']}}}}</script>
+  <style>
+    :root{--bg:#07101E;--surface:#0D1B2E;--card:rgba(13,27,46,.85);--border:rgba(14,165,233,.12);--primary:#0EA5E9;--green:#22C55E;--purple:#8B5CF6;--text:#F1F5F9;--muted:#94A3B8;--subtle:#1E293B}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1E3A5F;border-radius:3px}
+    .glass{background:var(--card);border:1px solid var(--border);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+    .text-gradient{background:linear-gradient(135deg,#0EA5E9 0%,#8B5CF6 55%,#22C55E 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+    .d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}.d5{transition-delay:.4s}
+    #canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:.35}
+    nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .3s ease;padding:16px 0}
+    nav.scrolled{background:rgba(7,16,30,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:10px 0}
+    .btn-cta{background:linear-gradient(135deg,#0EA5E9,#0369A1);color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s ease;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .btn-cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(14,165,233,.35)}
+    .btn-cta:active{transform:translateY(0)}
+    .btn-cta:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-outline{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:11px 24px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s ease;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+    .btn-outline:hover{color:var(--text);border-color:rgba(14,165,233,.4);background:rgba(14,165,233,.06)}
+    .input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+    .input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.12)}
+    .input::placeholder{color:var(--muted)}
+    select.input option{background:#0D1B2E;color:var(--text)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;transition:all .25s ease}
+    .card:hover{border-color:rgba(14,165,233,.28);box-shadow:0 8px 32px rgba(14,165,233,.08)}
+    .tab{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s ease;border:none;font-family:inherit;background:transparent;color:var(--muted)}
+    .tab.active{background:rgba(14,165,233,.15);color:var(--primary)}
+    .tab:hover:not(.active){color:var(--text)}
+    .chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s ease;user-select:none}
+    .chip:hover{transform:scale(1.06)}
+    .APPLIED{background:rgba(59,130,246,.15);color:#60A5FA;border:1px solid rgba(59,130,246,.25)}
+    .SCREENING{background:rgba(245,158,11,.15);color:#FCD34D;border:1px solid rgba(245,158,11,.25)}
+    .INTERVIEW{background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.25)}
+    .TECHNICAL{background:rgba(249,115,22,.15);color:#FB923C;border:1px solid rgba(249,115,22,.25)}
+    .OFFER{background:rgba(34,197,94,.15);color:#4ADE80;border:1px solid rgba(34,197,94,.25)}
+    .REJECTED{background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.25)}
+    .WITHDRAWN{background:rgba(100,116,139,.15);color:#94A3B8;border:1px solid rgba(100,116,139,.25)}
+    .dropdown{position:absolute;z-index:200;top:calc(100% + 6px);left:0;background:#0D1B2E;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);min-width:150px}
+    .ditem{padding:9px 14px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;transition:background .15s;display:flex;align-items:center;gap:10px}
+    .ditem:hover{background:rgba(255,255,255,.05)}
+    .approw{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:11px;background:rgba(255,255,255,.025);border:1px solid var(--border);transition:all .2s ease;cursor:default}
+    .approw:hover{background:rgba(255,255,255,.05);border-color:rgba(14,165,233,.2)}
+    .alert{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .alert-err{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+    .alert-ok{background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid rgba(34,197,94,.2)}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spin{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .4s ease forwards}
+    @keyframes pulse-glow{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.4)}50%{box-shadow:0 0 20px rgba(34,197,94,.7)}}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#22C55E;animation:pulse-glow 2s ease infinite;flex-shrink:0}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .floating{animation:float 5s ease-in-out infinite}
+    .process-card{position:relative;overflow:visible}
+    .process-card::after{content:'';position:absolute;top:50%;right:-32px;width:64px;height:1px;background:linear-gradient(90deg,var(--primary),transparent);transform:translateY(-50%)}
+    .process-card:last-child::after{display:none}
+    .section-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.2);color:var(--primary);font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:7px 16px;border-radius:20px}
+    .stat-pill{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 22px;transition:all .25s ease}
+    .stat-pill:hover{border-color:rgba(14,165,233,.3);box-shadow:0 6px 24px rgba(14,165,233,.1);transform:translateY(-2px)}
+    @keyframes countup{from{opacity:0}to{opacity:1}}
+    .window-chrome{border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 40px 80px -20px rgba(0,0,0,.6),0 0 0 1px rgba(14,165,233,.04)}
+    .window-bar{background:rgba(13,27,46,.97);padding:13px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+    .tl{width:13px;height:13px;border-radius:50%}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s ease;user-select:none}
+    .sidebar-link:hover,.sidebar-link.active{background:rgba(14,165,233,.1);color:var(--primary)}
+    .sidebar-link svg{flex-shrink:0}
+    .mini-bar{height:6px;border-radius:3px;transition:width .8s ease}
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <div style="max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between">
+    <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,#0EA5E9,#0369A1);border-radius:9px;display:flex;align-items:center;justify-content:center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <span style="font-weight:800;font-size:17px;color:var(--text)">JobTracker</span>
+    </a>
+    <div style="display:flex;align-items:center;gap:8px">
+      <a href="#how" style="color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;transition:color .2s" onmouseover="this.style.color='#F1F5F9'" onmouseout="this.style.color='#94A3B8'">How it works</a>
+      <a href="#features" style="color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;padding:8px 14px;transition:color .2s" onmouseover="this.style.color='#F1F5F9'" onmouseout="this.style.color='#94A3B8'">Features</a>
+      <a href="#demo" class="btn-cta" style="padding:9px 20px;font-size:13px">Try it live
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:1">
+  <!-- glow blobs -->
+  <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(14,165,233,.1) 0%,transparent 65%);pointer-events:none"></div>
+  <div style="position:absolute;top:200px;left:10%;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,.08) 0%,transparent 70%);pointer-events:none"></div>
+  <div style="position:absolute;top:150px;right:8%;width:250px;height:250px;background:radial-gradient(circle,rgba(34,197,94,.07) 0%,transparent 70%);pointer-events:none"></div>
+
+  <div style="position:relative;z-index:1;text-align:center;padding:120px 24px 80px;max-width:860px">
+    <div class="reveal section-tag" style="margin-bottom:24px">
+      <div class="live-dot"></div>
+      API live at localhost:8080
+    </div>
+
+    <h1 class="reveal d1" style="font-size:clamp(40px,6vw,72px);font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:24px">
+      Track every application.<br>
+      <span class="text-gradient">Land your dream job.</span>
+    </h1>
+
+    <p class="reveal d2" style="font-size:18px;color:var(--muted);line-height:1.7;max-width:560px;margin:0 auto 40px;font-weight:400">
+      A beautiful, intelligent tracker that turns job-search chaos into a clear pipeline — with real-time stats, status history, and instant insights.
+    </p>
+
+    <div class="reveal d3" style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:60px">
+      <a href="#demo" class="btn-cta" style="font-size:15px;padding:13px 28px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Try it yourself
+      </a>
+      <a href="#how" class="btn-outline" style="font-size:15px;padding:13px 28px">See how it works</a>
+    </div>
+
+    <!-- floating stat cards -->
+    <div class="reveal d4" style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
+      <div class="card floating" style="padding:16px 22px;display:flex;align-items:center;gap:12px;animation-delay:0s">
+        <div style="width:38px;height:38px;background:rgba(14,165,233,.15);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:var(--text)" id="hero-count-1">0</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:500">status changes tracked</div>
+        </div>
+      </div>
+      <div class="card floating" style="padding:16px 22px;display:flex;align-items:center;gap:12px;animation-delay:1.5s">
+        <div style="width:38px;height:38px;background:rgba(34,197,94,.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:var(--text)">7</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:500">application statuses</div>
+        </div>
+      </div>
+      <div class="card floating" style="padding:16px 22px;display:flex;align-items:center;gap:12px;animation-delay:3s">
+        <div style="width:38px;height:38px;background:rgba(139,92,246,.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:var(--text)">Real-time</div>
+          <div style="font-size:12px;color:var(--muted);font-weight:500">analytics & rates</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- scroll indicator -->
+  <div style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:.4">
+    <span style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Scroll</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="position:relative;z-index:1;padding:100px 24px;max-width:1200px;margin:0 auto">
+  <div class="reveal" style="text-align:center;margin-bottom:64px">
+    <div class="section-tag" style="margin-bottom:16px">The process</div>
+    <h2 style="font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1.2px;margin-bottom:14px">Three steps to your next role</h2>
+    <p style="color:var(--muted);font-size:17px;max-width:480px;margin:0 auto;line-height:1.7">From first application to signed offer — every step is tracked, logged, and analysed.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px" id="process-grid">
+    <!-- Step 1 -->
+    <div class="card process-card reveal d1" style="padding:32px">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,rgba(14,165,233,.2),rgba(14,165,233,.05));border:1px solid rgba(14,165,233,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:24px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Step 01</div>
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:-.4px">Apply & Log</h3>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7">Add every application in seconds — company, role, URL, date, and notes. Never lose track of where you've applied.</p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="card process-card reveal d2" style="padding:32px">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,rgba(139,92,246,.2),rgba(139,92,246,.05));border:1px solid rgba(139,92,246,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:24px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#8B5CF6;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Step 02</div>
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:-.4px">Move Through Pipeline</h3>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7">Update status with one tap: Applied → Screening → Interview → Technical → Offer. Every change is logged automatically.</p>
+
+      <!-- mini pipeline -->
+      <div style="display:flex;align-items:center;gap:4px;margin-top:20px;flex-wrap:wrap">
+        <span class="chip APPLIED" style="font-size:9px;padding:3px 8px">Applied</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <span class="chip SCREENING" style="font-size:9px;padding:3px 8px">Screen</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <span class="chip INTERVIEW" style="font-size:9px;padding:3px 8px">Interview</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <span class="chip OFFER" style="font-size:9px;padding:3px 8px">Offer</span>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="card process-card reveal d3" style="padding:32px">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(34,197,94,.05));border:1px solid rgba(34,197,94,.25);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:24px">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#22C55E;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">Step 03</div>
+      <h3 style="font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:-.4px">Analyse & Improve</h3>
+      <p style="color:var(--muted);font-size:14px;line-height:1.7">See your response rate, interview conversion, and offer rate. Know exactly where to improve your search strategy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO -->
+<section id="features" style="position:relative;z-index:1;padding:80px 24px;max-width:1200px;margin:0 auto">
+  <div class="reveal" style="text-align:center;margin-bottom:56px">
+    <div class="section-tag" style="margin-bottom:16px">Built-in features</div>
+    <h2 style="font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1.2px">Everything you need to get hired</h2>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:16px">
+    <!-- Big card: Status pipeline -->
+    <div class="card reveal d1" style="grid-column:1/3;padding:32px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+        <div style="width:36px;height:36px;background:rgba(14,165,233,.12);border-radius:9px;display:flex;align-items:center;justify-content:center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div style="font-size:15px;font-weight:700">Visual Pipeline</div>
+          <div style="font-size:12px;color:var(--muted)">Track where every application stands</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:80px;text-align:center;padding:16px 8px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.15);border-radius:12px">
+          <div style="font-size:22px;font-weight:800;color:#60A5FA" id="f-applied">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600">Applied</div>
+          <div class="mini-bar" style="background:#60A5FA;width:60%;margin:8px auto 0" id="bar-applied"></div>
+        </div>
+        <div style="flex:1;min-width:80px;text-align:center;padding:16px 8px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:12px">
+          <div style="font-size:22px;font-weight:800;color:#FCD34D" id="f-screening">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600">Screening</div>
+          <div class="mini-bar" style="background:#FCD34D;width:40%;margin:8px auto 0" id="bar-screening"></div>
+        </div>
+        <div style="flex:1;min-width:80px;text-align:center;padding:16px 8px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:12px">
+          <div style="font-size:22px;font-weight:800;color:#A78BFA" id="f-interview">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600">Interview</div>
+          <div class="mini-bar" style="background:#A78BFA;width:25%;margin:8px auto 0" id="bar-interview"></div>
+        </div>
+        <div style="flex:1;min-width:80px;text-align:center;padding:16px 8px;background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.15);border-radius:12px">
+          <div style="font-size:22px;font-weight:800;color:#FB923C" id="f-technical">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600">Technical</div>
+          <div class="mini-bar" style="background:#FB923C;width:15%;margin:8px auto 0" id="bar-technical"></div>
+        </div>
+        <div style="flex:1;min-width:80px;text-align:center;padding:16px 8px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:12px">
+          <div style="font-size:22px;font-weight:800;color:#4ADE80" id="f-offer">—</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;font-weight:600">Offer</div>
+          <div class="mini-bar" style="background:#4ADE80;width:5%;margin:8px auto 0" id="bar-offer"></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:16px;font-style:italic">Live data from your dashboard — log in below to populate</p>
+    </div>
+
+    <!-- Small card: Response rate -->
+    <div class="card reveal d2" style="padding:28px">
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Response rate
+      </div>
+      <div style="font-size:42px;font-weight:800;letter-spacing:-2px;color:var(--primary)" id="f-response">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">of applications received a reply</div>
+    </div>
+
+    <!-- Status history -->
+    <div class="card reveal d1" style="padding:28px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">Auto Status History</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">
+          <div style="width:6px;height:6px;border-radius:50%;background:#22C55E"></div>
+          Every status change is automatically logged with timestamp
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">
+          <div style="width:6px;height:6px;border-radius:50%;background:#0EA5E9"></div>
+          Full audit trail from first application to final outcome
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">
+          <div style="width:6px;height:6px;border-radius:50%;background:#8B5CF6"></div>
+          Zero manual effort — happens on every PATCH /status call
+        </div>
+      </div>
+    </div>
+
+    <!-- JWT auth -->
+    <div class="card reveal d2" style="padding:28px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">JWT Auth — Your data, only yours</span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.65">Every request is signed with a 24-hour JWT token. You can only see your own applications — complete data isolation per user.</p>
+    </div>
+
+    <!-- Offer rate -->
+    <div class="card reveal d3" style="padding:28px">
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        Offer rate
+      </div>
+      <div style="font-size:42px;font-weight:800;letter-spacing:-2px;color:#22C55E" id="f-offer-rate">—</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px">of all applications converted</div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo" style="position:relative;z-index:1;padding:80px 24px 120px;max-width:1100px;margin:0 auto">
+  <div class="reveal" style="text-align:center;margin-bottom:48px">
+    <div class="section-tag" style="margin-bottom:16px">
+      <div class="live-dot"></div>
+      Connected to localhost:8080
+    </div>
+    <h2 style="font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1.2px;margin-bottom:14px">Try it yourself, right now</h2>
+    <p style="color:var(--muted);font-size:17px;max-width:500px;margin:0 auto;line-height:1.7">Register, add your applications, update statuses and watch the stats update in real time.</p>
+  </div>
+
+  <!-- App window -->
+  <div class="reveal window-chrome">
+    <!-- Title bar -->
+    <div class="window-bar">
+      <div class="tl" style="background:#FF5F57"></div>
+      <div class="tl" style="background:#FFBD2E"></div>
+      <div class="tl" style="background:#28C840"></div>
+      <div style="flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--muted)">JobTracker — localhost:8080</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="live-dot"></div>
+        <span style="font-size:11px;color:#22C55E;font-weight:600">Running</span>
+      </div>
+    </div>
+
+    <!-- App body -->
+    <div style="background:var(--bg);display:flex;min-height:560px">
+
+      <!-- Sidebar -->
+      <div id="app-sidebar" style="width:220px;background:#07101E;border-right:1px solid var(--border);padding:20px 12px;display:none;flex-direction:column;gap:4px;flex-shrink:0">
+        <div style="padding:12px;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;color:var(--text)" id="sidebar-email">user@example.com</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">Logged in</div>
+        </div>
+        <div class="sidebar-link active" onclick="showView('dashboard')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div class="sidebar-link" onclick="showView('add')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Add Application
+        </div>
+        <div class="sidebar-link" onclick="showView('stats')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </div>
+        <div style="flex:1"></div>
+        <div class="sidebar-link" onclick="logout()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Log out
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div style="flex:1;overflow-y:auto;padding:28px">
+
+        <!-- AUTH VIEW -->
+        <div id="view-auth">
+          <div style="max-width:380px;margin:0 auto">
+            <h3 style="font-size:22px;font-weight:800;margin-bottom:4px;letter-spacing:-.5px">Get started</h3>
+            <p style="color:var(--muted);font-size:13px;margin-bottom:24px">Create an account or sign in to access your dashboard.</p>
+
+            <div style="display:flex;gap:8px;margin-bottom:24px;background:rgba(255,255,255,.03);padding:4px;border-radius:10px;border:1px solid var(--border)">
+              <button class="tab active" id="tab-register" style="flex:1" onclick="switchTab('register')">Register</button>
+              <button class="tab" id="tab-login" style="flex:1" onclick="switchTab('login')">Sign in</button>
+            </div>
+
+            <div id="auth-alert" style="display:none"></div>
+
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Email</label>
+                <input class="input" type="email" id="auth-email" placeholder="you@example.com" />
+              </div>
+              <div>
+                <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Password</label>
+                <input class="input" type="password" id="auth-password" placeholder="Min. 8 characters" />
+              </div>
+              <button class="btn-cta" id="auth-btn" onclick="doAuth()" style="width:100%;justify-content:center;margin-top:4px">
+                <span id="auth-btn-text">Create account</span>
+              </button>
+            </div>
+
+            <div style="margin-top:28px;padding:16px;background:rgba(14,165,233,.05);border:1px solid rgba(14,165,233,.12);border-radius:10px">
+              <p style="font-size:12px;color:var(--muted);line-height:1.6">
+                <strong style="color:var(--primary)">How this works:</strong> Register creates a user in your local PostgreSQL database. Login returns a 24-hour JWT token stored in your browser's localStorage. All subsequent requests are authenticated with this token.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" style="display:none">
+          <!-- Stats row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px" id="stats-grid">
+            <div class="stat-pill">
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">Total Applications</div>
+              <div style="font-size:28px;font-weight:800;color:var(--text)" id="s-total">0</div>
+            </div>
+            <div class="stat-pill">
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">Response Rate</div>
+              <div style="font-size:28px;font-weight:800;color:var(--primary)" id="s-response">0%</div>
+            </div>
+            <div class="stat-pill">
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">Interview Conv.</div>
+              <div style="font-size:28px;font-weight:800;color:#8B5CF6" id="s-interview-rate">0%</div>
+            </div>
+            <div class="stat-pill">
+              <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">Offer Rate</div>
+              <div style="font-size:28px;font-weight:800;color:#22C55E" id="s-offer">0%</div>
+            </div>
+          </div>
+
+          <!-- Applications list -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h4 style="font-size:15px;font-weight:700">Your Applications</h4>
+            <button class="btn-cta" onclick="showView('add')" style="padding:8px 16px;font-size:12px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add new
+            </button>
+          </div>
+
+          <div id="apps-list" style="display:flex;flex-direction:column;gap:8px">
+            <div class="empty-state" style="color:var(--muted);text-align:center;padding:40px">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+              <p style="font-size:13px">No applications yet.<br>Add your first one above.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD APPLICATION VIEW -->
+        <div id="view-add" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+            <button onclick="showView('dashboard')" class="btn-outline" style="padding:7px 14px;font-size:13px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Back
+            </button>
+            <h4 style="font-size:16px;font-weight:700">Add Application</h4>
+          </div>
+          <div id="add-alert" style="display:none"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:560px">
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Company *</label>
+              <input class="input" id="a-company" placeholder="e.g. Google" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Job Title *</label>
+              <input class="input" id="a-title" placeholder="e.g. Software Engineer" />
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Status *</label>
+              <select class="input" id="a-status">
+                <option value="APPLIED">Applied</option>
+                <option value="SCREENING">Screening</option>
+                <option value="INTERVIEW">Interview</option>
+                <option value="TECHNICAL">Technical</option>
+                <option value="OFFER">Offer</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Applied Date *</label>
+              <input class="input" type="date" id="a-date" />
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Job URL</label>
+              <input class="input" id="a-url" placeholder="https://careers.company.com/..." />
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block">Notes</label>
+              <textarea class="input" id="a-notes" rows="3" placeholder="Recruiter name, referral, interview notes..." style="resize:vertical"></textarea>
+            </div>
+            <div style="grid-column:1/-1">
+              <button class="btn-cta" id="add-btn" onclick="addApplication()" style="width:100%;justify-content:center">
+                <span id="add-btn-text">Save Application</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATS VIEW -->
+        <div id="view-stats" style="display:none">
+          <h4 style="font-size:16px;font-weight:700;margin-bottom:20px">Analytics Overview</h4>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+            <div style="padding:20px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.15);border-radius:12px">
+              <div style="font-size:11px;font-weight:700;color:var(--primary);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Response Rate</div>
+              <div style="font-size:36px;font-weight:800;color:var(--primary)" id="st-rr">0%</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">apps that got a reply</div>
+            </div>
+            <div style="padding:20px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.15);border-radius:12px">
+              <div style="font-size:11px;font-weight:700;color:#8B5CF6;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Interview Conv.</div>
+              <div style="font-size:36px;font-weight:800;color:#8B5CF6" id="st-ic">0%</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">of responses → interview</div>
+            </div>
+            <div style="padding:20px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);border-radius:12px">
+              <div style="font-size:11px;font-weight:700;color:#22C55E;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Offer Rate</div>
+              <div style="font-size:36px;font-weight:800;color:#22C55E" id="st-or">0%</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">of all apps → offer</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+            <div style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;text-align:center">
+              <div style="font-size:20px;font-weight:800;color:#60A5FA" id="st-applied">0</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Applied</div>
+            </div>
+            <div style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;text-align:center">
+              <div style="font-size:20px;font-weight:800;color:#FCD34D" id="st-screening">0</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Screening</div>
+            </div>
+            <div style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;text-align:center">
+              <div style="font-size:20px;font-weight:800;color:#A78BFA" id="st-interview">0</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Interview</div>
+            </div>
+            <div style="padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;text-align:center">
+              <div style="font-size:20px;font-weight:800;color:#4ADE80" id="st-offer">0</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px">Offer</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="position:relative;z-index:1;border-top:1px solid var(--border);padding:40px 24px;text-align:center">
+  <div style="max-width:1200px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px">
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#0EA5E9,#0369A1);border-radius:7px;display:flex;align-items:center;justify-content:center">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <span style="font-weight:800;font-size:15px">JobTracker</span>
+    </div>
+    <p style="color:var(--muted);font-size:13px">Spring Boot 3 · PostgreSQL · JWT · REST API · Running locally</p>
+    <p style="color:var(--subtle);font-size:12px;margin-top:8px">API: <a href="/swagger-ui/index.html" style="color:var(--primary);text-decoration:none" target="_blank">Swagger UI →</a></p>
+  </div>
+</footer>
+
+<script>
+// ── Particles ─────────────────────────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('canvas'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+  function init(){pts=[];for(let i=0;i<70;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.5+.5})}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(14,165,233,.6)';ctx.fill();
+    });
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(14,165,233,${.12*(1-d/120)})`;ctx.lineWidth=.6;ctx.stroke()}
+    }
+    requestAnimationFrame(draw);
+  }
+  resize();init();draw();
+  window.addEventListener('resize',()=>{resize();init()});
+})();
+
+// ── Scroll reveal ──────────────────────────────────────────────────────────────
+const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+// ── Navbar scroll ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scrolled',scrollY>40)});
+
+// ── Count-up hero ──────────────────────────────────────────────────────────────
+function countUp(el,target,duration=1200){
+  const start=Date.now();
+  const tick=()=>{
+    const p=Math.min(1,(Date.now()-start)/duration);
+    el.textContent=Math.round(target*p).toLocaleString();
+    if(p<1)requestAnimationFrame(tick);
+  };tick();
+}
+setTimeout(()=>countUp(document.getElementById('hero-count-1'),1247),600);
+
+// ── API state ──────────────────────────────────────────────────────────────────
+let TOKEN=localStorage.getItem('jt_token')||null;
+let openDropdown=null;
+
+// ── API helpers ────────────────────────────────────────────────────────────────
+async function api(method,path,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(TOKEN)opts.headers['Authorization']='Bearer '+TOKEN;
+  if(body)opts.body=JSON.stringify(body);
+  const r=await fetch(path,opts);
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(data.messages?.[0]||data.message||'Request failed');
+  return data;
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+let authMode='register';
+function switchTab(mode){
+  authMode=mode;
+  document.getElementById('tab-register').classList.toggle('active',mode==='register');
+  document.getElementById('tab-login').classList.toggle('active',mode==='login');
+  document.getElementById('auth-btn-text').textContent=mode==='register'?'Create account':'Sign in';
+  hideAlert('auth-alert');
+}
+
+async function doAuth(){
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  if(!email||!password){showAlert('auth-alert','Email and password required','err');return;}
+  const btn=document.getElementById('auth-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    const endpoint=authMode==='register'?'/api/auth/register':'/api/auth/login';
+    const res=await api('POST',endpoint,{email,password});
+    TOKEN=res.token;
+    localStorage.setItem('jt_token',TOKEN);
+    document.getElementById('sidebar-email').textContent=res.email;
+    document.getElementById('app-sidebar').style.display='flex';
+    await showView('dashboard');
+  }catch(e){
+    showAlert('auth-alert',e.message,'err');
+    btn.disabled=false;
+    btn.innerHTML='<span id="auth-btn-text">'+(authMode==='register'?'Create account':'Sign in')+'</span>';
+  }
+}
+
+function logout(){
+  TOKEN=null;localStorage.removeItem('jt_token');
+  document.getElementById('app-sidebar').style.display='none';
+  ['dashboard','add','stats'].forEach(v=>document.getElementById('view-'+v).style.display='none');
+  document.getElementById('view-auth').style.display='block';
+}
+
+// ── Views ──────────────────────────────────────────────────────────────────────
+async function showView(v){
+  ['auth','dashboard','add','stats'].forEach(id=>{
+    document.getElementById('view-'+id).style.display='none';
+  });
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('view-'+v).style.display='block';
+  if(v==='dashboard'){
+    document.querySelectorAll('.sidebar-link')[0].classList.add('active');
+    await loadDashboard();
+  }
+  if(v==='add'){
+    document.querySelectorAll('.sidebar-link')[1].classList.add('active');
+    document.getElementById('a-date').value=new Date().toISOString().split('T')[0];
+    hideAlert('add-alert');
+  }
+  if(v==='stats'){
+    document.querySelectorAll('.sidebar-link')[2].classList.add('active');
+    await loadStats();
+  }
+}
+
+// ── Load dashboard ─────────────────────────────────────────────────────────────
+async function loadDashboard(){
+  try{
+    const [appsData,statsData]=await Promise.all([
+      api('GET','/api/applications?size=50&sortBy=appliedDate&sortDir=desc'),
+      api('GET','/api/stats/summary')
+    ]);
+    renderStats(statsData);
+    renderApps(appsData.content||[]);
+    updateBentoStats(statsData);
+  }catch(e){console.error(e)}
+}
+
+async function loadStats(){
+  try{
+    const s=await api('GET','/api/stats/summary');
+    document.getElementById('st-rr').textContent=s.responseRate+'%';
+    document.getElementById('st-ic').textContent=s.interviewConversionRate+'%';
+    document.getElementById('st-or').textContent=s.offerRate+'%';
+    document.getElementById('st-applied').textContent=s.appliedCount;
+    document.getElementById('st-screening').textContent=s.screeningCount;
+    document.getElementById('st-interview').textContent=s.interviewCount;
+    document.getElementById('st-offer').textContent=s.offerCount;
+  }catch(e){console.error(e)}
+}
+
+function renderStats(s){
+  document.getElementById('s-total').textContent=s.totalApplications;
+  document.getElementById('s-response').textContent=s.responseRate+'%';
+  document.getElementById('s-interview-rate').textContent=s.interviewConversionRate+'%';
+  document.getElementById('s-offer').textContent=s.offerRate+'%';
+}
+
+function updateBentoStats(s){
+  const map={applied:'f-applied',screening:'f-screening',interview:'f-interview',technical:'f-technical',offer:'f-offer'};
+  const counts={applied:s.appliedCount,screening:s.screeningCount,interview:s.interviewCount,technical:s.technicalCount,offer:s.offerCount};
+  const max=Math.max(...Object.values(counts),1);
+  Object.entries(map).forEach(([k,id])=>{
+    document.getElementById(id).textContent=counts[k];
+    const bar=document.getElementById('bar-'+k);
+    if(bar)bar.style.width=Math.max(5,(counts[k]/max)*90)+'%';
+  });
+  document.getElementById('f-response').textContent=s.responseRate+'%';
+  document.getElementById('f-offer-rate').textContent=s.offerRate+'%';
+}
+
+// ── Render apps ────────────────────────────────────────────────────────────────
+function renderApps(apps){
+  const container=document.getElementById('apps-list');
+  if(!apps.length){
+    container.innerHTML=`<div style="color:#475569;text-align:center;padding:40px">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <p style="font-size:13px">No applications yet. Add your first one!</p></div>`;
+    return;
+  }
+  container.innerHTML=apps.map(app=>`
+    <div class="approw fade-up" id="app-${app.id}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;color:#F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(app.company)}</div>
+        <div style="font-size:12px;color:#94A3B8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(app.jobTitle)}</div>
+      </div>
+      <div style="font-size:12px;color:#475569;flex-shrink:0">${formatDate(app.appliedDate)}</div>
+      <div style="position:relative;flex-shrink:0">
+        <span class="chip ${app.status}" onclick="toggleDropdown(event,'${app.id}','${app.status}')" title="Click to change status">${app.status}</span>
+        <div class="dropdown" id="dd-${app.id}" style="display:none">
+          ${['APPLIED','SCREENING','INTERVIEW','TECHNICAL','OFFER','REJECTED','WITHDRAWN'].map(s=>`
+            <div class="ditem ${s}" onclick="changeStatus(${app.id},'${s}')">${s}</div>
+          `).join('')}
+        </div>
+      </div>
+      <button onclick="deleteApp(${app.id})" style="background:none;border:none;cursor:pointer;padding:4px;opacity:.4;transition:opacity .2s;color:#F87171" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'" title="Delete">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+// ── Dropdown ───────────────────────────────────────────────────────────────────
+function toggleDropdown(e,id,current){
+  e.stopPropagation();
+  const dd=document.getElementById('dd-'+id);
+  if(openDropdown&&openDropdown!==dd){openDropdown.style.display='none';}
+  const showing=dd.style.display==='block';
+  dd.style.display=showing?'none':'block';
+  openDropdown=showing?null:dd;
+}
+document.addEventListener('click',()=>{if(openDropdown){openDropdown.style.display='none';openDropdown=null;}});
+
+async function changeStatus(id,status){
+  if(openDropdown){openDropdown.style.display='none';openDropdown=null;}
+  try{
+    await api('PATCH',`/api/applications/${id}/status`,{status});
+    await loadDashboard();
+  }catch(e){alert('Failed to update status: '+e.message);}
+}
+
+async function deleteApp(id){
+  if(!confirm('Delete this application?'))return;
+  try{
+    await api('DELETE',`/api/applications/${id}`);
+    await loadDashboard();
+  }catch(e){alert('Failed: '+e.message);}
+}
+
+// ── Add application ────────────────────────────────────────────────────────────
+async function addApplication(){
+  const company=document.getElementById('a-company').value.trim();
+  const jobTitle=document.getElementById('a-title').value.trim();
+  const status=document.getElementById('a-status').value;
+  const appliedDate=document.getElementById('a-date').value;
+  const jobUrl=document.getElementById('a-url').value.trim();
+  const notes=document.getElementById('a-notes').value.trim();
+  if(!company||!jobTitle||!appliedDate){showAlert('add-alert','Company, job title and date are required','err');return;}
+  const btn=document.getElementById('add-btn');
+  btn.disabled=true;
+  document.getElementById('add-btn-text').innerHTML='<span class="spin" style="display:inline-block"></span>';
+  try{
+    await api('POST','/api/applications',{company,jobTitle,status,appliedDate,jobUrl:jobUrl||null,notes:notes||null});
+    showAlert('add-alert','Application saved!','ok');
+    ['a-company','a-title','a-url','a-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('a-status').value='APPLIED';
+    setTimeout(()=>showView('dashboard'),800);
+  }catch(e){
+    showAlert('add-alert',e.message,'err');
+  }finally{
+    btn.disabled=false;
+    document.getElementById('add-btn-text').textContent='Save Application';
+  }
+}
+
+// ── Alerts ─────────────────────────────────────────────────────────────────────
+function showAlert(id,msg,type){
+  const el=document.getElementById(id);
+  el.style.display='flex';
+  el.className='alert alert-'+(type==='err'?'err':'ok');
+  el.innerHTML=(type==='err'?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>':'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>')+msg;
+}
+function hideAlert(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function formatDate(d){if(!d)return'';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+(async function(){
+  if(TOKEN){
+    try{
+      const res=await api('GET','/api/stats/summary');
+      document.getElementById('app-sidebar').style.display='flex';
+      const stored=localStorage.getItem('jt_email')||'';
+      if(stored)document.getElementById('sidebar-email').textContent=stored;
+      await showView('dashboard');
+    }catch(e){
+      TOKEN=null;localStorage.removeItem('jt_token');
+    }
+  }
+  // Set today's date as default
+  const dateEl=document.getElementById('a-date');
+  if(dateEl)dateEl.value=new Date().toISOString().split('T')[0];
+
+  // Store email on auth
+  const origDoAuth=doAuth;
+})();
+
+// Store email on successful auth
+const _origAuth=doAuth;
+window.doAuth=async function(){
+  const email=document.getElementById('auth-email').value.trim();
+  await _origAuth();
+  if(TOKEN)localStorage.setItem('jt_email',email);
+};
+</script>
+</body>
+</html>

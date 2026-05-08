@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:jobtracker}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:c2VjcmV0LWtleS10aGF0LWlzLWF0LWxlYXN0LTI1Ni1iaXRzLWxvbmctZm9yLXNlY3VyaXR5LXB1cnBvc2Vz}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
