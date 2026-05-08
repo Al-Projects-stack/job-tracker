@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JobTracker App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Plus Jakarta Sans','sans-serif']}}}}</script>
+  <style>
+    :root{--bg:#07101E;--surface:#0D1B2E;--card:rgba(13,27,46,.9);--border:rgba(14,165,233,.12);--primary:#0EA5E9;--green:#22C55E;--purple:#8B5CF6;--text:#F1F5F9;--muted:#94A3B8;--subtle:#1E293B}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1E3A5F;border-radius:3px}
+
+    /* Layout */
+    #root{height:100vh;display:flex}
+    #sidebar{width:240px;background:#060e1a;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transition:width .25s ease}
+    #main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+
+    /* Sidebar */
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s ease;user-select:none;margin:1px 8px}
+    .nav-item:hover{background:rgba(14,165,233,.08);color:var(--text)}
+    .nav-item.active{background:rgba(14,165,233,.14);color:var(--primary)}
+    .nav-item svg{flex-shrink:0;width:16px;height:16px}
+
+    /* Input */
+    .inp{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
+    .inp:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+    .inp::placeholder{color:#475569}
+    select.inp option{background:#0D1B2E}
+    textarea.inp{resize:vertical;min-height:80px}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s ease;border:none}
+    .btn-primary{background:linear-gradient(135deg,#0EA5E9,#0369A1);color:#fff}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(14,165,233,.3)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+    .btn-ghost{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+    .btn-ghost:hover{background:rgba(255,255,255,.08);color:var(--text);border-color:rgba(14,165,233,.3)}
+    .btn-danger{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+    .btn-danger:hover{background:rgba(239,68,68,.2)}
+
+    /* Card */
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px}
+
+    /* Status chips */
+    .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;transition:all .15s ease;user-select:none;white-space:nowrap}
+    .chip:hover{transform:scale(1.05)}
+    .APPLIED   {background:rgba(59,130,246,.15);color:#60A5FA;border:1px solid rgba(59,130,246,.25)}
+    .SCREENING {background:rgba(245,158,11,.15);color:#FCD34D;border:1px solid rgba(245,158,11,.25)}
+    .INTERVIEW {background:rgba(139,92,246,.15);color:#A78BFA;border:1px solid rgba(139,92,246,.25)}
+    .TECHNICAL {background:rgba(249,115,22,.15);color:#FB923C;border:1px solid rgba(249,115,22,.25)}
+    .OFFER     {background:rgba(34,197,94,.15);color:#4ADE80;border:1px solid rgba(34,197,94,.25)}
+    .REJECTED  {background:rgba(239,68,68,.15);color:#F87171;border:1px solid rgba(239,68,68,.25)}
+    .WITHDRAWN {background:rgba(100,116,139,.15);color:#94A3B8;border:1px solid rgba(100,116,139,.25)}
+
+    /* Stat card */
+    .stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;transition:all .2s ease}
+    .stat:hover{border-color:rgba(14,165,233,.25);box-shadow:0 6px 24px rgba(14,165,233,.08);transform:translateY(-2px)}
+
+    /* App row */
+    .app-row{display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:11px;transition:all .18s ease}
+    .app-row:hover{background:rgba(255,255,255,.05);border-color:rgba(14,165,233,.2)}
+
+    /* Dropdown */
+    .dd{position:absolute;z-index:200;top:calc(100% + 6px);left:0;background:#0a1628;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.5);min-width:155px}
+    .ddi{padding:9px 14px;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;transition:background .12s;display:flex;align-items:center;gap:10px}
+    .ddi:hover{background:rgba(255,255,255,.06)}
+
+    /* Alert */
+    .alert{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:9px;font-size:13px;font-weight:500;margin-bottom:14px}
+    .alert-err{background:rgba(239,68,68,.1);color:#F87171;border:1px solid rgba(239,68,68,.2)}
+    .alert-ok{background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid rgba(34,197,94,.2)}
+
+    /* Tab */
+    .tab{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;border:none;font-family:inherit;background:transparent;color:var(--muted)}
+    .tab.on{background:rgba(14,165,233,.14);color:var(--primary)}
+    .tab:hover:not(.on){color:var(--text)}
+
+    /* Spinner */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spin{width:15px;height:15px;border-radius:50%;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
+    @keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .fadein{animation:fadein .3s ease forwards}
+
+    /* Page header */
+    .page-header{padding:28px 32px 0;border-bottom:1px solid var(--border);background:rgba(6,14,26,.6);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+
+    /* Auth screen */
+    #auth-screen{height:100vh;display:flex}
+    .auth-left{flex:1;background:linear-gradient(135deg,#060e1a 0%,#0d1b2e 100%);display:flex;flex-direction:column;justify-content:center;padding:60px;position:relative;overflow:hidden}
+    .auth-left::before{content:'';position:absolute;top:-100px;left:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(14,165,233,.12) 0%,transparent 65%);pointer-events:none}
+    .auth-right{width:440px;flex-shrink:0;background:#07101E;border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:48px}
+
+    /* Empty state */
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+
+    /* Rate bar */
+    @keyframes grow{from{width:0}to{width:var(--w)}}
+    .rate-bar{height:6px;border-radius:3px;background:var(--c);animation:grow .8s ease forwards;width:0}
+
+    /* Badge */
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(14,165,233,.08);border:1px solid rgba(14,165,233,.18);color:var(--primary);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:5px 12px;border-radius:20px}
+    @keyframes pulse-dot{0%,100%{box-shadow:0 0 6px #22C55E}50%{box-shadow:0 0 14px #22C55E}}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#22C55E;animation:pulse-dot 2s ease infinite;flex-shrink:0}
+  </style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <!-- Left branding panel -->
+  <div class="auth-left">
+    <a href="/" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:48px">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#0EA5E9,#0369A1);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <span style="font-size:18px;font-weight:800;color:#F1F5F9">JobTracker</span>
+    </a>
+
+    <h1 style="font-size:36px;font-weight:800;letter-spacing:-1.2px;line-height:1.15;margin-bottom:16px">
+      Your job search,<br>
+      <span style="background:linear-gradient(135deg,#0EA5E9,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">finally organised.</span>
+    </h1>
+    <p style="color:#94A3B8;font-size:15px;line-height:1.7;margin-bottom:40px;max-width:360px">Track every application through the full pipeline — from applied to offer — with automatic status history and live analytics.</p>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;background:rgba(14,165,233,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <span style="font-size:14px;color:#CBD5E1">7-stage pipeline with one-click status updates</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;background:rgba(139,92,246,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>
+        </div>
+        <span style="font-size:14px;color:#CBD5E1">Every status change logged automatically</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:32px;height:32px;background:rgba(34,197,94,.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <span style="font-size:14px;color:#CBD5E1">Response rate, interview conversion, offer rate</span>
+      </div>
+    </div>
+
+    <div style="margin-top:auto;padding-top:48px">
+      <div class="badge"><div class="live-dot"></div>API running at localhost:8080</div>
+    </div>
+  </div>
+
+  <!-- Right auth form -->
+  <div class="auth-right">
+    <h2 style="font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Get started</h2>
+    <p style="color:#64748B;font-size:13px;margin-bottom:28px">Create an account or sign in to your dashboard.</p>
+
+    <div style="display:flex;gap:6px;background:rgba(255,255,255,.03);padding:4px;border-radius:10px;border:1px solid var(--border);margin-bottom:28px">
+      <button class="tab on" id="t-reg" style="flex:1" onclick="setMode('register')">Register</button>
+      <button class="tab" id="t-log" style="flex:1" onclick="setMode('login')">Sign in</button>
+    </div>
+
+    <div id="auth-msg" style="display:none"></div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:#64748B;display:block;margin-bottom:6px">Email address</label>
+        <input class="inp" type="email" id="inp-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doAuth()"/>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:#64748B;display:block;margin-bottom:6px">Password</label>
+        <input class="inp" type="password" id="inp-pass" placeholder="Min. 8 characters" onkeydown="if(event.key==='Enter')doAuth()"/>
+      </div>
+      <button class="btn btn-primary" id="auth-btn" onclick="doAuth()" style="width:100%;justify-content:center;padding:13px;font-size:15px;margin-top:4px">
+        <span id="auth-btn-lbl">Create account</span>
+      </button>
+    </div>
+
+    <p style="color:#334155;font-size:12px;text-align:center;margin-top:24px;line-height:1.6">
+      By continuing you agree that your data lives only in your local PostgreSQL database and is never sent anywhere.
+    </p>
+  </div>
+</div>
+
+<!-- APP SCREEN (hidden until auth) -->
+<div id="app-screen" style="display:none;height:100vh">
+  <div id="root">
+
+    <!-- Sidebar -->
+    <div id="sidebar">
+      <div style="padding:20px 16px 12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+          <div style="width:32px;height:32px;background:linear-gradient(135deg,#0EA5E9,#0369A1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          </div>
+          <span style="font-size:15px;font-weight:800;color:#F1F5F9">JobTracker</span>
+        </div>
+
+        <!-- User pill -->
+        <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:20px">
+          <div style="font-size:12px;font-weight:700;color:#F1F5F9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sb-email">user@example.com</div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px">
+            <div class="live-dot" style="width:6px;height:6px"></div>
+            <span style="font-size:11px;color:#22C55E;font-weight:600">Active session</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:0 8px;display:flex;flex-direction:column;gap:2px">
+        <div class="nav-item active" id="nav-dash" onclick="nav('dash')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" id="nav-add" onclick="nav('add')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Add Application
+        </div>
+        <div class="nav-item" id="nav-analytics" onclick="nav('analytics')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </div>
+      </div>
+
+      <div style="margin-top:auto;padding:12px 8px 20px">
+        <div class="nav-item" onclick="logout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </div>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div id="main">
+
+      <!-- DASHBOARD PAGE -->
+      <div id="page-dash" style="display:none">
+        <div class="page-header">
+          <div style="padding-bottom:20px">
+            <h1 style="font-size:22px;font-weight:800;letter-spacing:-.5px">Dashboard</h1>
+            <p style="color:#64748B;font-size:13px;margin-top:2px">Your job search at a glance</p>
+          </div>
+        </div>
+        <div style="padding:28px 32px">
+          <!-- Stats row -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px">
+            <div class="stat">
+              <div style="font-size:11px;font-weight:700;color:#64748B;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>Total
+              </div>
+              <div style="font-size:36px;font-weight:800;letter-spacing:-1.5px;color:#F1F5F9" id="d-total">0</div>
+              <div style="font-size:12px;color:#475569;margin-top:4px">applications tracked</div>
+            </div>
+            <div class="stat">
+              <div style="font-size:11px;font-weight:700;color:#64748B;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+                <span style="color:#0EA5E9">Response</span>
+              </div>
+              <div style="font-size:36px;font-weight:800;letter-spacing:-1.5px;color:#0EA5E9" id="d-rr">0%</div>
+              <div style="font-size:12px;color:#475569;margin-top:4px">of applications replied</div>
+            </div>
+            <div class="stat">
+              <div style="font-size:11px;font-weight:700;color:#64748B;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span style="color:#8B5CF6">Interview</span>
+              </div>
+              <div style="font-size:36px;font-weight:800;letter-spacing:-1.5px;color:#8B5CF6" id="d-ir">0%</div>
+              <div style="font-size:12px;color:#475569;margin-top:4px">interview conversion</div>
+            </div>
+            <div class="stat">
+              <div style="font-size:11px;font-weight:700;color:#64748B;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <span style="color:#22C55E">Offer rate</span>
+              </div>
+              <div style="font-size:36px;font-weight:800;letter-spacing:-1.5px;color:#22C55E" id="d-or">0%</div>
+              <div style="font-size:12px;color:#475569;margin-top:4px">of all applications</div>
+            </div>
+          </div>
+
+          <!-- Applications -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <h3 style="font-size:16px;font-weight:700">Applications</h3>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input class="inp" id="search-inp" placeholder="Search company or title..." style="width:220px;padding:8px 12px;font-size:13px" oninput="filterApps()"/>
+              <select class="inp" id="filter-status" style="width:140px;padding:8px 12px;font-size:13px" onchange="filterApps()">
+                <option value="">All statuses</option>
+                <option>APPLIED</option><option>SCREENING</option><option>INTERVIEW</option>
+                <option>TECHNICAL</option><option>OFFER</option><option>REJECTED</option><option>WITHDRAWN</option>
+              </select>
+              <button class="btn btn-primary" onclick="nav('add')" style="padding:8px 16px;font-size:13px;white-space:nowrap">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add new
+              </button>
+            </div>
+          </div>
+          <div id="apps-container" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+      </div>
+
+      <!-- ADD PAGE -->
+      <div id="page-add" style="display:none">
+        <div class="page-header">
+          <div style="padding-bottom:20px;display:flex;align-items:center;gap:12px">
+            <button class="btn btn-ghost" onclick="nav('dash')" style="padding:7px 14px;font-size:13px">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              Back
+            </button>
+            <div>
+              <h1 style="font-size:22px;font-weight:800;letter-spacing:-.5px">Add Application</h1>
+              <p style="color:#64748B;font-size:13px;margin-top:2px">Log a new job application to your tracker</p>
+            </div>
+          </div>
+        </div>
+        <div style="padding:32px;max-width:640px">
+          <div id="add-msg" style="display:none"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Company *</label>
+              <input class="inp" id="f-company" placeholder="e.g. Google"/>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Job Title *</label>
+              <input class="inp" id="f-title" placeholder="e.g. Senior Software Engineer"/>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Status *</label>
+              <select class="inp" id="f-status">
+                <option value="APPLIED">Applied</option>
+                <option value="SCREENING">Screening</option>
+                <option value="INTERVIEW">Interview</option>
+                <option value="TECHNICAL">Technical</option>
+                <option value="OFFER">Offer</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Applied Date *</label>
+              <input class="inp" type="date" id="f-date"/>
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Job URL</label>
+              <input class="inp" id="f-url" placeholder="https://careers.company.com/..."/>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Follow-up Date</label>
+              <input class="inp" type="date" id="f-followup"/>
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">&nbsp;</label>
+              <div style="font-size:12px;color:#475569;padding:11px 0;line-height:1.6">Set a reminder date for when to follow up on this application.</div>
+            </div>
+            <div style="grid-column:1/-1">
+              <label style="font-size:12px;font-weight:700;color:#64748B;display:block;margin-bottom:7px">Notes</label>
+              <textarea class="inp" id="f-notes" rows="4" placeholder="Recruiter name, referral source, interview notes, salary range..."></textarea>
+            </div>
+            <div style="grid-column:1/-1">
+              <button class="btn btn-primary" id="save-btn" onclick="saveApp()" style="padding:13px 32px;font-size:15px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span id="save-lbl">Save Application</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS PAGE -->
+      <div id="page-analytics" style="display:none">
+        <div class="page-header">
+          <div style="padding-bottom:20px">
+            <h1 style="font-size:22px;font-weight:800;letter-spacing:-.5px">Analytics</h1>
+            <p style="color:#64748B;font-size:13px;margin-top:2px">Understand your job search performance</p>
+          </div>
+        </div>
+        <div style="padding:28px 32px">
+          <!-- Rate cards -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
+            <div style="padding:24px;background:rgba(14,165,233,.06);border:1px solid rgba(14,165,233,.18);border-radius:14px">
+              <div style="font-size:11px;font-weight:700;color:#0EA5E9;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Response Rate</div>
+              <div style="font-size:48px;font-weight:800;letter-spacing:-2px;color:#0EA5E9;margin-bottom:8px" id="a-rr">0%</div>
+              <div style="font-size:13px;color:#64748B;margin-bottom:16px">of all applications received any response</div>
+              <div style="height:6px;background:rgba(14,165,233,.15);border-radius:3px;overflow:hidden">
+                <div class="rate-bar" id="a-rr-bar" style="--c:#0EA5E9;--w:0%"></div>
+              </div>
+            </div>
+            <div style="padding:24px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.18);border-radius:14px">
+              <div style="font-size:11px;font-weight:700;color:#8B5CF6;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Interview Conversion</div>
+              <div style="font-size:48px;font-weight:800;letter-spacing:-2px;color:#8B5CF6;margin-bottom:8px" id="a-ic">0%</div>
+              <div style="font-size:13px;color:#64748B;margin-bottom:16px">of responded applications reached interview stage</div>
+              <div style="height:6px;background:rgba(139,92,246,.15);border-radius:3px;overflow:hidden">
+                <div class="rate-bar" id="a-ic-bar" style="--c:#8B5CF6;--w:0%"></div>
+              </div>
+            </div>
+            <div style="padding:24px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18);border-radius:14px">
+              <div style="font-size:11px;font-weight:700;color:#22C55E;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px">Offer Rate</div>
+              <div style="font-size:48px;font-weight:800;letter-spacing:-2px;color:#22C55E;margin-bottom:8px" id="a-or">0%</div>
+              <div style="font-size:13px;color:#64748B;margin-bottom:16px">of all applications resulted in an offer</div>
+              <div style="height:6px;background:rgba(34,197,94,.15);border-radius:3px;overflow:hidden">
+                <div class="rate-bar" id="a-or-bar" style="--c:#22C55E;--w:0%"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status breakdown -->
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:16px">Status Breakdown</h3>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px" id="status-breakdown">
+            <!-- filled by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /root -->
+</div><!-- /app-screen -->
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let TOKEN = localStorage.getItem('jt_token');
+let allApps = [];
+let openDD = null;
+let authMode = 'register';
+
+// ── API ────────────────────────────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (TOKEN) opts.headers['Authorization'] = 'Bearer ' + TOKEN;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.messages?.[0] || data.message || 'Request failed');
+  return data;
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────────
+function setMode(m) {
+  authMode = m;
+  document.getElementById('t-reg').classList.toggle('on', m === 'register');
+  document.getElementById('t-log').classList.toggle('on', m === 'login');
+  document.getElementById('auth-btn-lbl').textContent = m === 'register' ? 'Create account' : 'Sign in';
+  hideMsg('auth-msg');
+}
+
+async function doAuth() {
+  const email = document.getElementById('inp-email').value.trim();
+  const pass = document.getElementById('inp-pass').value;
+  if (!email || !pass) { showMsg('auth-msg', 'Email and password are required', 'err'); return; }
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>';
+  try {
+    const ep = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
+    const res = await api('POST', ep, { email, password: pass });
+    TOKEN = res.token;
+    localStorage.setItem('jt_token', TOKEN);
+    localStorage.setItem('jt_email', res.email);
+    document.getElementById('sb-email').textContent = res.email;
+    enterApp();
+  } catch (e) {
+    showMsg('auth-msg', e.message, 'err');
+    btn.disabled = false;
+    btn.innerHTML = '<span id="auth-btn-lbl">' + (authMode === 'register' ? 'Create account' : 'Sign in') + '</span>';
+  }
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  nav('dash');
+}
+
+function logout() {
+  TOKEN = null;
+  localStorage.removeItem('jt_token');
+  localStorage.removeItem('jt_email');
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('inp-email').value = '';
+  document.getElementById('inp-pass').value = '';
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────────
+function nav(page) {
+  ['dash','add','analytics'].forEach(p => {
+    document.getElementById('page-'+p).style.display = 'none';
+    document.getElementById('nav-'+p)?.classList.remove('active');
+  });
+  document.getElementById('page-'+page).style.display = 'block';
+  document.getElementById('nav-'+page)?.classList.add('active');
+  document.getElementById('main').scrollTo(0, 0);
+
+  if (page === 'dash') loadDash();
+  if (page === 'add') {
+    hideMsg('add-msg');
+    document.getElementById('f-date').value = today();
+    document.getElementById('f-followup').value = '';
+  }
+  if (page === 'analytics') loadAnalytics();
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────────────
+async function loadDash() {
+  try {
+    const [appsRes, statsRes] = await Promise.all([
+      api('GET', '/api/applications?size=200&sortBy=appliedDate&sortDir=desc'),
+      api('GET', '/api/stats/summary')
+    ]);
+    allApps = appsRes.content || [];
+    document.getElementById('d-total').textContent = statsRes.totalApplications;
+    document.getElementById('d-rr').textContent = statsRes.responseRate + '%';
+    document.getElementById('d-ir').textContent = statsRes.interviewConversionRate + '%';
+    document.getElementById('d-or').textContent = statsRes.offerRate + '%';
+    renderApps(allApps);
+  } catch(e) { console.error(e); }
+}
+
+function filterApps() {
+  const q = document.getElementById('search-inp').value.toLowerCase();
+  const s = document.getElementById('filter-status').value;
+  const filtered = allApps.filter(a => {
+    const matchQ = !q || a.company.toLowerCase().includes(q) || a.jobTitle.toLowerCase().includes(q);
+    const matchS = !s || a.status === s;
+    return matchQ && matchS;
+  });
+  renderApps(filtered);
+}
+
+function renderApps(apps) {
+  const c = document.getElementById('apps-container');
+  if (!apps.length) {
+    c.innerHTML = `<div class="empty fadein">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#1E3A5F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 16px;display:block"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      <p style="font-size:14px;font-weight:600;margin-bottom:6px">No applications yet</p>
+      <p style="font-size:13px">Click <strong style="color:#0EA5E9">Add new</strong> to log your first application.</p>
+    </div>`;
+    return;
+  }
+  c.innerHTML = apps.map(a => `
+    <div class="app-row fadein">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.company)}</div>
+        <div style="font-size:12px;color:#64748B;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.jobTitle)}</div>
+      </div>
+      ${a.jobUrl ? `<a href="${esc(a.jobUrl)}" target="_blank" style="color:#0EA5E9;font-size:12px;text-decoration:none;flex-shrink:0" title="Open job listing">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>` : '<div style="width:14px"></div>'}
+      <div style="font-size:12px;color:#475569;flex-shrink:0">${fmtDate(a.appliedDate)}</div>
+      <div style="position:relative;flex-shrink:0">
+        <span class="chip ${a.status}" onclick="toggleDD(event,${a.id})" title="Click to change status">${a.status}</span>
+        <div class="dd" id="dd-${a.id}" style="display:none">
+          ${['APPLIED','SCREENING','INTERVIEW','TECHNICAL','OFFER','REJECTED','WITHDRAWN'].map(s =>
+            `<div class="ddi ${s}" onclick="changeStatus(${a.id},'${s}')">${s}</div>`
+          ).join('')}
+        </div>
+      </div>
+      <button onclick="deleteApp(${a.id})" style="background:none;border:none;cursor:pointer;padding:6px;opacity:.3;transition:opacity .18s;color:#F87171;flex-shrink:0;border-radius:6px" onmouseover="this.style.opacity='1';this.style.background='rgba(239,68,68,.1)'" onmouseout="this.style.opacity='.3';this.style.background='none'" title="Delete">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+// ── Status dropdown ────────────────────────────────────────────────────────────
+function toggleDD(e, id) {
+  e.stopPropagation();
+  const dd = document.getElementById('dd-' + id);
+  if (openDD && openDD !== dd) openDD.style.display = 'none';
+  const showing = dd.style.display === 'block';
+  dd.style.display = showing ? 'none' : 'block';
+  openDD = showing ? null : dd;
+}
+document.addEventListener('click', () => { if (openDD) { openDD.style.display = 'none'; openDD = null; } });
+
+async function changeStatus(id, status) {
+  if (openDD) { openDD.style.display = 'none'; openDD = null; }
+  try {
+    await api('PATCH', `/api/applications/${id}/status`, { status });
+    await loadDash();
+  } catch(e) { alert('Failed: ' + e.message); }
+}
+
+async function deleteApp(id) {
+  if (!confirm('Delete this application?')) return;
+  try {
+    await api('DELETE', `/api/applications/${id}`);
+    await loadDash();
+  } catch(e) { alert('Failed: ' + e.message); }
+}
+
+// ── Add application ────────────────────────────────────────────────────────────
+async function saveApp() {
+  const company = document.getElementById('f-company').value.trim();
+  const jobTitle = document.getElementById('f-title').value.trim();
+  const status = document.getElementById('f-status').value;
+  const appliedDate = document.getElementById('f-date').value;
+  const jobUrl = document.getElementById('f-url').value.trim();
+  const followUpDate = document.getElementById('f-followup').value;
+  const notes = document.getElementById('f-notes').value.trim();
+
+  if (!company || !jobTitle || !appliedDate) {
+    showMsg('add-msg', 'Company, job title and applied date are required', 'err');
+    return;
+  }
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  document.getElementById('save-lbl').innerHTML = '<span class="spin"></span>';
+  try {
+    await api('POST', '/api/applications', {
+      company, jobTitle, status, appliedDate,
+      jobUrl: jobUrl || null,
+      followUpDate: followUpDate || null,
+      notes: notes || null
+    });
+    showMsg('add-msg', 'Application saved successfully!', 'ok');
+    ['f-company','f-title','f-url','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-status').value = 'APPLIED';
+    document.getElementById('f-followup').value = '';
+    document.getElementById('f-date').value = today();
+    setTimeout(() => nav('dash'), 900);
+  } catch(e) {
+    showMsg('add-msg', e.message, 'err');
+  } finally {
+    btn.disabled = false;
+    document.getElementById('save-lbl').textContent = 'Save Application';
+  }
+}
+
+// ── Analytics ──────────────────────────────────────────────────────────────────
+async function loadAnalytics() {
+  try {
+    const s = await api('GET', '/api/stats/summary');
+    document.getElementById('a-rr').textContent = s.responseRate + '%';
+    document.getElementById('a-ic').textContent = s.interviewConversionRate + '%';
+    document.getElementById('a-or').textContent = s.offerRate + '%';
+
+    // Animate bars
+    ['a-rr-bar','a-ic-bar','a-or-bar'].forEach((id, i) => {
+      const vals = [s.responseRate, s.interviewConversionRate, s.offerRate];
+      const el = document.getElementById(id);
+      el.style.setProperty('--w', Math.min(100, vals[i]) + '%');
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = 'grow .9s ease forwards';
+    });
+
+    // Status breakdown
+    const statuses = [
+      { key:'appliedCount',    label:'Applied',    color:'#60A5FA', count:s.appliedCount },
+      { key:'screeningCount',  label:'Screening',  color:'#FCD34D', count:s.screeningCount },
+      { key:'interviewCount',  label:'Interview',  color:'#A78BFA', count:s.interviewCount },
+      { key:'technicalCount',  label:'Technical',  color:'#FB923C', count:s.technicalCount },
+      { key:'offerCount',      label:'Offer',      color:'#4ADE80', count:s.offerCount },
+      { key:'rejectedCount',   label:'Rejected',   color:'#F87171', count:s.rejectedCount },
+      { key:'withdrawnCount',  label:'Withdrawn',  color:'#94A3B8', count:s.withdrawnCount },
+    ];
+    document.getElementById('status-breakdown').innerHTML = statuses.map(st => `
+      <div style="padding:18px 14px;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:12px;text-align:center;transition:all .2s ease" onmouseover="this.style.borderColor='${st.color}40'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:28px;font-weight:800;color:${st.color};letter-spacing:-1px">${st.count}</div>
+        <div style="font-size:11px;font-weight:700;color:#475569;margin-top:5px;letter-spacing:.3px">${st.label}</div>
+      </div>
+    `).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function showMsg(id, msg, type) {
+  const el = document.getElementById(id);
+  el.style.display = 'flex';
+  el.className = 'alert alert-' + (type === 'err' ? 'err' : 'ok');
+  const icon = type === 'err'
+    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  el.innerHTML = icon + msg;
+}
+function hideMsg(id) { const e = document.getElementById(id); if(e) e.style.display = 'none'; }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function fmtDate(d) { if(!d) return ''; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+(async function init() {
+  document.getElementById('f-date').value = today();
+  const stored = localStorage.getItem('jt_email');
+  if (stored) document.getElementById('sb-email').textContent = stored;
+
+  if (TOKEN) {
+    try {
+      await api('GET', '/api/stats/summary'); // validate token
+      enterApp();
+    } catch {
+      TOKEN = null;
+      localStorage.removeItem('jt_token');
+    }
+  }
+})();
+</script>
+</body>
+</html>
