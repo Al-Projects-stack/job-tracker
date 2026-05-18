@@ -11,6 +11,8 @@ A full-stack job application tracker — Spring Boot 3 REST API with a built-in 
 ---
 
 ## What it does
+<img width="1903" height="817" alt="image" src="https://github.com/user-attachments/assets/b9e57f8c-ae9e-400a-8449-26da6739458e" />
+
 
 - Register / login with JWT-secured accounts
 - Add job applications with company, title, URL, status, dates and notes
