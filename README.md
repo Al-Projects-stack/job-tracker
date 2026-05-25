@@ -304,3 +304,10 @@ Uses H2 in-memory database via the `test` Spring profile no PostgreSQL required.
 Swagger UI is available at `http://localhost:8080/swagger-ui/index.html`.
 
 Click **Authorize**, enter `Bearer <your-token>`, and every endpoint becomes interactive.
+
+## What I Learned
+
+- Configuring Spring Security 3 for stateless JWT auth: building the filter chain, validating tokens on every request, and wiring in a custom UserDetailsService
+- Using JPA Specifications to compose dynamic query filters at runtime without writing raw SQL or JPQL strings
+- How to trigger automatic audit logging by inserting a StatusHistory row in the service layer every time an application status changes
+- Containerizing a Spring Boot and PostgreSQL app with Docker Compose and externalizing all configuration through environment variables
