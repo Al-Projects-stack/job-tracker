@@ -1,6 +1,6 @@
 # JobTracker API
 
-A full-stack job application tracker — Spring Boot 3 REST API with a built-in interactive frontend, JWT authentication, PostgreSQL persistence, and automatic status history logging.
+A full-stack job application tracker Spring Boot 3 REST API with a built-in interactive frontend, JWT authentication, PostgreSQL persistence, and automatic status history logging.
 
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-brightgreen?style=flat-square)
@@ -16,8 +16,8 @@ A full-stack job application tracker — Spring Boot 3 REST API with a built-in 
 
 - Register / login with JWT-secured accounts
 - Add job applications with company, title, URL, status, dates and notes
-- Move applications through a 7-stage pipeline with one API call — every change is logged automatically to `status_history`
-- Query applications with filters: status, date range, search by company or title — all paginated
+- Move applications through a 7-stage pipeline with one API call every change is logged automatically to `status_history`
+- Query applications with filters: status, date range, search by company or title all paginated
 - View live analytics: response rate, interview conversion rate, offer rate
 - Serve a stunning animated frontend at `http://localhost:8080/` with no extra setup
 
@@ -62,7 +62,7 @@ src/main/resources/
 
 ---
 
-## Quick start — Docker (recommended)
+## Quick start Docker (recommended)
 
 ```bash
 git clone <repo-url>
@@ -80,7 +80,7 @@ docker compose down -v
 
 ---
 
-## Quick start — local (Maven + PostgreSQL)
+## Quick start local (Maven + PostgreSQL)
 
 **Prerequisites:** JDK 17+, Maven 3.9+, PostgreSQL running locally.
 
@@ -119,7 +119,7 @@ $env:JWT_SECRET="your-secret-key-minimum-32-characters-long"
 | `DB_NAME` | `jobtracker` | Database name |
 | `DB_USER` | `postgres` | Database username |
 | `DB_PASSWORD` | `postgres` | Database password |
-| `JWT_SECRET` | *(base64 key)* | Signing secret — **change in production** |
+| `JWT_SECRET` | *(base64 key)* | Signing secret **change in production** |
 | `JWT_EXPIRATION_MS` | `86400000` | Token TTL in ms (default 24 h) |
 
 ---
@@ -216,10 +216,10 @@ curl -X DELETE http://localhost:8080/api/applications/1 \
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `status` | enum | — | Filter by status |
-| `search` | string | — | Match company or job title |
-| `startDate` | ISO date | — | Applied date ≥ |
-| `endDate` | ISO date | — | Applied date ≤ |
+| `status` | enum | | Filter by status |
+| `search` | string | | Match company or job title |
+| `startDate` | ISO date | | Applied date ≥ |
+| `endDate` | ISO date | | Applied date ≤ |
 | `page` | int | `0` | Page index (0-based) |
 | `size` | int | `20` | Results per page |
 | `sortBy` | string | `appliedDate` | Field to sort by |
@@ -285,7 +285,7 @@ The app ships a built-in frontend served at `http://localhost:8080/`:
 - Three-step "How it works" walkthrough
 - Live features bento grid populated from the authenticated user's data
 - Embedded full app: register → dashboard → add applications → change statuses → analytics
-- No build step — plain HTML/CSS/JS bundled as a Spring Boot static resource
+- No build step plain HTML/CSS/JS bundled as a Spring Boot static resource
 
 ---
 
@@ -295,7 +295,7 @@ The app ships a built-in frontend served at `http://localhost:8080/`:
 mvn test
 ```
 
-Uses H2 in-memory database via the `test` Spring profile — no PostgreSQL required.
+Uses H2 in-memory database via the `test` Spring profile no PostgreSQL required.
 
 ---
 
