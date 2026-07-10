@@ -6,3 +6,4 @@ target/
 *.war
 .env
 *.log
+AGENTS.md
